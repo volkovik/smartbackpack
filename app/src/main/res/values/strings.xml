@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">Smart backpack</string>
+    <string name="app_name">Умный рюкзак</string>
+    <string name="title_backpack">Рюкзак</string>
+    <string name="title_items">Предметы</string>
+    <string name="title_lists">Списки</string>
+    <string name="title_settings">Рюкзак</string>
+    <string name="title_create_list">Создание списка</string>
+    <string name="title_edit_list">Изменение списка</string>
 </resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/backpackFragment">
+    <fragment
+        android:id="@+id/backpackFragment"
+        android:name="com.example.smartbackpack.BackpackFragment"
+        android:label="fragment_backpack"
+        tools:layout="@layout/fragment_backpack" />
+    <fragment
+        android:id="@+id/itemsFragment"
+        android:name="com.example.smartbackpack.ItemsFragment"
+        android:label="fragment_items"
+        tools:layout="@layout/fragment_items" />
+    <fragment
+        android:id="@+id/listsFragment"
+        android:name="com.example.smartbackpack.ListsFragment"
+        android:label="fragment_lists"
+        tools:layout="@layout/fragment_lists" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.smartbackpack.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/createListFragment"
+        android:name="com.example.smartbackpack.CreateListFragment"
+        android:label="fragment_create_list"
+        tools:layout="@layout/fragment_create_list" >
+        <action
+            android:id="@+id/action_createListFragment_to_editListFragment"
+            app:destination="@id/editListFragment" />
+        <action
+            android:id="@+id/action_createListFragment_to_listsFragment"
+            app:destination="@id/listsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editListFragment"
+        android:name="com.example.smartbackpack.EditListFragment"
+        android:label="fragment_edit_list"
+        tools:layout="@layout/fragment_edit_list" />
+</navigation>
