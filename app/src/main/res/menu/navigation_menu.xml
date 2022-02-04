@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/destination_backpack"
+        android:icon="@drawable/ic_baseline_backpack_24"
+        android:title="@string/title_backpack" />
+
+    <item
+        android:id="@+id/destination_items"
+        android:icon="@drawable/ic_baseline_category_24"
+        android:title="@string/title_items" />
+
+    <item
+        android:id="@+id/destination_lists"
+        android:icon="@drawable/ic_baseline_format_list_bulleted_24"
+        android:title="@string/title_lists" />
+
+    <item
+        android:id="@+id/destination_settings"
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="@string/title_settings" />
+</menu>
