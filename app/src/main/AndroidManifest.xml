@@ -2,6 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.smartbackpack">
 
+    <uses-feature android:name="android.hardware.bluetooth" android:required="true"/>
+
+    <!-- On old devices -->
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30"/>
+    <!-- On new devices -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

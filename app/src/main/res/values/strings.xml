@@ -6,4 +6,10 @@
     <string name="title_settings">Настройки</string>
     <string name="title_create_list">Создание списка</string>
     <string name="title_edit_list">Изменение списка</string>
+
+    <string name="alert">Внимание!</string>
+    <string name="bluetooth_required_explanation">Этому приложению нужен Bluetooth для полноценной работы. Без него не будут приходить данные с рюкзака.</string>
+
+    <string name="turn_on_button">Включить</string>
+    <string name="exit_button">Выйти</string>
 </resources>
