@@ -10,17 +10,23 @@ import androidx.navigation.ui.NavigationUI
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.Manifest
 import android.app.AlertDialog
+import android.bluetooth.BluetoothDevice
 import android.content.*
+import androidx.activity.viewModels
+import com.example.smartbackpack.settings.BluetoothViewModel
 import kotlin.system.exitProcess
 
 
 const val REQUEST_ENABLE_BT: Int = 1
+const val CURRENT_BLUETOOTH_DEVICE = "CURRENT_BLUETOOTH_DEVICE"
 
 
 class MainActivity: AppCompatActivity() {
 
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothIsOffAlertDialog: AlertDialog
+    // Этот ViewModel предназначен для управления Bluetooth устройствами в SettingsFragment
+    private val bluetoothViewModel: BluetoothViewModel by viewModels()
 
     private val bluetoothAdapterStateReceiver: BroadcastReceiver = object: BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -38,6 +44,9 @@ class MainActivity: AppCompatActivity() {
                     BluetoothAdapter.STATE_TURNING_ON -> {
                         // Скрываем диалоговое окно об выключенном Bluetooth
                         bluetoothIsOffAlertDialog.dismiss()
+                    }
+                    BluetoothAdapter.STATE_ON -> {
+                        getBluetoothDevices()
                     }
                 }
             }
@@ -89,6 +98,8 @@ class MainActivity: AppCompatActivity() {
         if (!bluetoothAdapter.isEnabled) {
             // Попросить пользователя включить Bluetooth
             bluetoothIsOffAlertDialog.show()
+        } else {
+            getBluetoothDevices()
         }
         // Отслеживаем изменения состояния Bluetooth, т. е. включён или выключен
         this.registerReceiver(
@@ -109,6 +120,29 @@ class MainActivity: AppCompatActivity() {
                     bluetoothIsOffAlertDialog.show()
                 }
             }
+        }
+    }
+
+    private fun getBluetoothDevices() {
+        // Получаем список привязанных Bluetooth устройств
+        val pairedDevices: Set<BluetoothDevice> = bluetoothAdapter.bondedDevices
+        // Получаем сохранённые данные с прошлой сессии. А именно выбранное устройство
+        val sharedPreferences = getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
+        val macAddressOfBluetoothDevice: String? = sharedPreferences.getString(CURRENT_BLUETOOTH_DEVICE, null)
+        // Если выбранное устройство не было найдено, либо его не было до этого, то мы выбираем
+        // первое попавшиеся устройство
+        val selectedDevice: BluetoothDevice  = pairedDevices.find {
+            it.address == macAddressOfBluetoothDevice
+        } ?: pairedDevices.first()
+
+        // Обновляем информацию в ViewModel для SettingsFragment
+        bluetoothViewModel.changePairedDevices(pairedDevices)
+        bluetoothViewModel.changeCurrentDevice(selectedDevice)
+
+        bluetoothViewModel.currentDevice.observe(this@MainActivity) {
+            val editor = sharedPreferences.edit()
+            editor.putString(CURRENT_BLUETOOTH_DEVICE, it.address)
+            editor.apply()
         }
     }
 }
