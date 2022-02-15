@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import com.example.smartbackpack.settings.BluetoothViewModel
 import java.io.IOException
+import java.io.InputStream
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -32,6 +33,7 @@ class MainActivity: AppCompatActivity() {
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothConnectionThread: BluetoothConnectionThread
     private lateinit var bluetoothIsOffAlertDialog: AlertDialog
+
     // Этот ViewModel предназначен для управления Bluetooth устройствами в SettingsFragment
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
 
@@ -141,10 +143,11 @@ class MainActivity: AppCompatActivity() {
         val pairedDevices: Set<BluetoothDevice> = bluetoothAdapter.bondedDevices
         // Получаем сохранённые данные с прошлой сессии. А именно выбранное устройство
         val sharedPreferences = getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
-        val macAddressOfBluetoothDevice: String? = sharedPreferences.getString(CURRENT_BLUETOOTH_DEVICE, null)
+        val macAddressOfBluetoothDevice: String? =
+            sharedPreferences.getString(CURRENT_BLUETOOTH_DEVICE, null)
         // Если выбранное устройство не было найдено, либо его не было до этого, то мы выбираем
         // первое попавшиеся устройство
-        val selectedDevice: BluetoothDevice  = pairedDevices.find {
+        val selectedDevice: BluetoothDevice = pairedDevices.find {
             it.address == macAddressOfBluetoothDevice
         } ?: pairedDevices.first()
 
@@ -170,18 +173,20 @@ class MainActivity: AppCompatActivity() {
 
     private inner class BluetoothConnectionThread(
         device: BluetoothDevice
-    ) : Thread() {
+    ): Thread() {
         private val mmSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
             device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"))
         }
-        val handler: Handler = object : Handler(Looper.myLooper()!!) {
+        val handler: Handler = object: Handler(Looper.myLooper()!!) {
             override fun handleMessage(msg: Message) {
                 when (msg.what) {
                     // Если подключение закончилось неудачно
-                    0 -> Toast.makeText(this@MainActivity, msg.obj as String, Toast.LENGTH_LONG  ).show()
+                    0 -> Toast.makeText(this@MainActivity, msg.obj as String, Toast.LENGTH_LONG)
+                        .show()
                 }
             }
         }
+        private var bluetoothTransferDataThread: BluetoothTransferDataThread? = null
 
         override fun run() {
             Looper.prepare()
@@ -193,12 +198,16 @@ class MainActivity: AppCompatActivity() {
                     it.connect()
                 } catch (e: IOException) {
                     Log.e(TAG, "Bluetooth connection went wrong with ${it.remoteDevice.name}", e)
-                    handler.obtainMessage(0, "Выбранное Bluetooth устройство не выходит на связь. Выберите другое устройство.").sendToTarget()
+                    handler.obtainMessage(
+                        0,
+                        "Выбранное Bluetooth устройство не выходит на связь. Выберите другое устройство."
+                    ).sendToTarget()
                     return
                 }
 
                 Log.i(TAG, "Bluetooth connection with ${it.remoteDevice.name} was success")
-                // Some code
+                bluetoothTransferDataThread = BluetoothTransferDataThread(it)
+                bluetoothTransferDataThread!!.start()
             }
 
             Looper.loop()
@@ -211,6 +220,57 @@ class MainActivity: AppCompatActivity() {
             } catch (e: IOException) {
                 Log.e(TAG, "Could not close the client socket", e)
             }
+        }
+    }
+
+    private inner class BluetoothTransferDataThread(
+        mmSocket: BluetoothSocket
+    ): Thread() {
+        private val mmInStream: InputStream = mmSocket.inputStream
+        private val mmBuffer: ByteArray = ByteArray(32)
+        private val handler = object : Handler(Looper.myLooper()!!) {
+            var text: String = ""
+
+            override fun handleMessage(msg: Message) {
+                when (msg.what) {
+                    // Если были получены данные
+                    0 -> {
+                        text += msg.obj
+
+                        if (text.endsWith("\n\r") || text.endsWith("\r\n")) {
+                            text = text.trimEnd()
+                            // Прислать данные в виде короткого уведомления
+                            Toast.makeText(this@MainActivity, text, Toast.LENGTH_LONG).show()
+                            text = ""
+                        }
+                    }
+                }
+            }
+        }
+
+        override fun run() {
+            Looper.prepare()
+            var numBytes: Int
+
+            Log.d(TAG, "Trying to start input stream...")
+
+            // Запускаем цикл, проверяющий на данные в Input Stream
+            while (true)
+            {
+                numBytes = try {
+                    mmInStream.read(mmBuffer)
+                } catch (e: IOException) {
+                    Log.d(TAG, "Input stream was disconnected", e)
+                    break
+                }
+
+                // Переводим полученные байты в строку
+                val message = String(mmBuffer, 0, numBytes)
+                Log.d(TAG, "Received data: $message")
+                handler.obtainMessage(0, message).sendToTarget()
+            }
+
+            Looper.loop()
         }
     }
 }
