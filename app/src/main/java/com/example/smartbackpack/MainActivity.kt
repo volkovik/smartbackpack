@@ -3,7 +3,6 @@ package com.example.smartbackpack
 import android.bluetooth.BluetoothAdapter
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
@@ -11,12 +10,19 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.Manifest
 import android.app.AlertDialog
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothSocket
 import android.content.*
+import android.os.*
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.viewModels
 import com.example.smartbackpack.settings.BluetoothViewModel
+import java.io.IOException
+import java.util.*
 import kotlin.system.exitProcess
 
 
+const val TAG = "MainActivity"
 const val REQUEST_ENABLE_BT: Int = 1
 const val CURRENT_BLUETOOTH_DEVICE = "CURRENT_BLUETOOTH_DEVICE"
 
@@ -24,6 +30,7 @@ const val CURRENT_BLUETOOTH_DEVICE = "CURRENT_BLUETOOTH_DEVICE"
 class MainActivity: AppCompatActivity() {
 
     private lateinit var bluetoothAdapter: BluetoothAdapter
+    private lateinit var bluetoothConnectionThread: BluetoothConnectionThread
     private lateinit var bluetoothIsOffAlertDialog: AlertDialog
     // Этот ViewModel предназначен для управления Bluetooth устройствами в SettingsFragment
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
@@ -46,7 +53,8 @@ class MainActivity: AppCompatActivity() {
                         bluetoothIsOffAlertDialog.dismiss()
                     }
                     BluetoothAdapter.STATE_ON -> {
-                        getBluetoothDevices()
+                        // Восстанавливаем соединение
+                        initBluetoothFeatures()
                     }
                 }
             }
@@ -99,13 +107,18 @@ class MainActivity: AppCompatActivity() {
             // Попросить пользователя включить Bluetooth
             bluetoothIsOffAlertDialog.show()
         } else {
-            getBluetoothDevices()
+            initBluetoothFeatures()
         }
         // Отслеживаем изменения состояния Bluetooth, т. е. включён или выключен
         this.registerReceiver(
             bluetoothAdapterStateReceiver,
             IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
         )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        bluetoothConnectionThread.cancel()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -123,7 +136,7 @@ class MainActivity: AppCompatActivity() {
         }
     }
 
-    private fun getBluetoothDevices() {
+    private fun initBluetoothFeatures() {
         // Получаем список привязанных Bluetooth устройств
         val pairedDevices: Set<BluetoothDevice> = bluetoothAdapter.bondedDevices
         // Получаем сохранённые данные с прошлой сессии. А именно выбранное устройство
@@ -140,9 +153,64 @@ class MainActivity: AppCompatActivity() {
         bluetoothViewModel.changeCurrentDevice(selectedDevice)
 
         bluetoothViewModel.currentDevice.observe(this@MainActivity) {
+            // Сохраняем выбранное устройство
             val editor = sharedPreferences.edit()
             editor.putString(CURRENT_BLUETOOTH_DEVICE, it.address)
             editor.apply()
+
+            // Подключаемся к устройству и заканчиваем прошлые сессии
+            Log.d(TAG, "Start Bluetooth connection thread with ${it.name}")
+            if (this::bluetoothConnectionThread.isInitialized) {
+                bluetoothConnectionThread.cancel()
+            }
+            bluetoothConnectionThread = BluetoothConnectionThread(it)
+            bluetoothConnectionThread.start()
+        }
+    }
+
+    private inner class BluetoothConnectionThread(
+        device: BluetoothDevice
+    ) : Thread() {
+        private val mmSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
+            device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"))
+        }
+        val handler: Handler = object : Handler(Looper.myLooper()!!) {
+            override fun handleMessage(msg: Message) {
+                when (msg.what) {
+                    // Если подключение закончилось неудачно
+                    0 -> Toast.makeText(this@MainActivity, msg.obj as String, Toast.LENGTH_LONG  ).show()
+                }
+            }
+        }
+
+        override fun run() {
+            Looper.prepare()
+            bluetoothAdapter.cancelDiscovery()
+
+            mmSocket?.let {
+                // Подключаемся к устройству
+                try {
+                    it.connect()
+                } catch (e: IOException) {
+                    Log.e(TAG, "Bluetooth connection went wrong with ${it.remoteDevice.name}", e)
+                    handler.obtainMessage(0, "Выбранное Bluetooth устройство не выходит на связь. Выберите другое устройство.").sendToTarget()
+                    return
+                }
+
+                Log.i(TAG, "Bluetooth connection with ${it.remoteDevice.name} was success")
+                // Some code
+            }
+
+            Looper.loop()
+        }
+
+        fun cancel() {
+            // Закрыть Bluetooth подключение
+            try {
+                mmSocket?.close()
+            } catch (e: IOException) {
+                Log.e(TAG, "Could not close the client socket", e)
+            }
         }
     }
 }
