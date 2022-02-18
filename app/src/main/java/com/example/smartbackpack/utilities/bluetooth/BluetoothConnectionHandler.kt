@@ -10,8 +10,7 @@ class BluetoothConnectionHandler(private val context: Context) : Handler(Looper.
     override fun handleMessage(msg: Message) {
         when (msg.what) {
             // Если подключение закончилось неудачно
-            0 -> Toast.makeText(context, msg.obj as String, Toast.LENGTH_LONG)
-                .show()
+            0 -> Toast.makeText(context, msg.obj as String, Toast.LENGTH_LONG).show()
         }
     }
 }

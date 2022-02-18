@@ -8,7 +8,7 @@ import androidx.room.Query
 @Dao
 interface ItemDao {
     @Query("SELECT * FROM items WHERE id = :id")
-    fun getItem(id: String): Item
+    fun getItem(id: String): Item?
 
     @Query("SELECT * FROM items ORDER BY label ASC")
     fun getAllItems(): List<Item>

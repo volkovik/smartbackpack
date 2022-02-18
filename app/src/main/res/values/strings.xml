@@ -5,8 +5,13 @@
     <string name="title_settings">Настройки</string>
 
     <string name="alert">Внимание!</string>
+    <string name="new_item">Новая метка!</string>
+    <string name="add_new_item">Изменение названия</string>
     <string name="bluetooth_required_explanation">Этому приложению нужен Bluetooth для полноценной работы. Без него не будут приходить данные с рюкзака.</string>
+    <string name="new_item_description">Приложение обнаружила ранее неизвестную метку. Не хотите ли вы дать ей название?</string>
 
     <string name="turn_on_button">Включить</string>
     <string name="exit_button">Выйти</string>
+    <string name="cancel_button">Отмена</string>
+    <string name="add_button">Добавить</string>
 </resources>

@@ -78,9 +78,6 @@ class MainActivity: AppCompatActivity() {
             NavigationUI.setupWithNavController(it, navController)
         }
 
-        // Инициализация базы данных
-        database = AppDatabase.getDatabase(applicationContext)
-
         // Инициализируем диалоговое окно для случаев, когда Bluetooth был выключен
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.apply {
