@@ -15,30 +15,8 @@
         android:label="fragment_items"
         tools:layout="@layout/fragment_items" />
     <fragment
-        android:id="@+id/listsFragment"
-        android:name="com.example.smartbackpack.ListsFragment"
-        android:label="fragment_lists"
-        tools:layout="@layout/fragment_lists" />
-    <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.smartbackpack.settings.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
-    <fragment
-        android:id="@+id/createListFragment"
-        android:name="com.example.smartbackpack.CreateListFragment"
-        android:label="fragment_create_list"
-        tools:layout="@layout/fragment_create_list" >
-        <action
-            android:id="@+id/action_createListFragment_to_editListFragment"
-            app:destination="@id/editListFragment" />
-        <action
-            android:id="@+id/action_createListFragment_to_listsFragment"
-            app:destination="@id/listsFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/editListFragment"
-        android:name="com.example.smartbackpack.EditListFragment"
-        android:label="fragment_edit_list"
-        tools:layout="@layout/fragment_edit_list" />
 </navigation>
