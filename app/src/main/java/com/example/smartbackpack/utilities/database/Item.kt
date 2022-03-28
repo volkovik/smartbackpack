@@ -6,9 +6,7 @@ import org.jetbrains.annotations.NotNull
 
 @Entity(tableName = "items")
 data class Item(
-    @PrimaryKey
-    @NotNull
-    var id: String,
+    @PrimaryKey @NotNull var id: String,
     var label: String,
     var state: Boolean
 )

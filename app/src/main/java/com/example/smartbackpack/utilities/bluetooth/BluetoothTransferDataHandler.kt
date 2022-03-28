@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import com.example.smartbackpack.R

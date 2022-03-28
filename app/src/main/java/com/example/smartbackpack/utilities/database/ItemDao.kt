@@ -1,5 +1,6 @@
 package com.example.smartbackpack.utilities.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -11,7 +12,7 @@ interface ItemDao {
     fun getItem(id: String): Item?
 
     @Query("SELECT * FROM items ORDER BY label ASC")
-    fun getAllItems(): List<Item>
+    fun getAllItems(): LiveData<List<Item>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun postItem(item: Item)
@@ -21,4 +22,7 @@ interface ItemDao {
 
     @Query("UPDATE items SET label = :label WHERE id = :id")
     fun changeItemLabel(id: String, label: String)
+
+    @Query("DELETE FROM items WHERE id = :id")
+    fun deleteItem(id: String)
 }
