@@ -6,12 +6,12 @@
     app:startDestination="@id/backpackFragment">
     <fragment
         android:id="@+id/backpackFragment"
-        android:name="com.example.smartbackpack.backpack.BackpackFragment"
+        android:name="com.example.smartbackpack.BackpackFragment"
         android:label="fragment_backpack"
         tools:layout="@layout/fragment_backpack" />
     <fragment
         android:id="@+id/itemsFragment"
-        android:name="com.example.smartbackpack.items.ItemsFragment"
+        android:name="com.example.smartbackpack.ItemsFragment"
         android:label="fragment_items"
         tools:layout="@layout/fragment_items" />
     <fragment

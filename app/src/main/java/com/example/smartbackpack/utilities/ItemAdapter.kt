@@ -1,4 +1,4 @@
-package com.example.smartbackpack.items
+package com.example.smartbackpack.utilities
 
 import android.app.AlertDialog
 import android.content.Context
@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.smartbackpack.R
@@ -15,10 +16,16 @@ import com.example.smartbackpack.utilities.database.ItemDao
 
 class ItemAdapter(
     val context: Context,
-    private val items: List<Item>
+    current_items: List<Item>,
+    other_items: List<Item>
 ): RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
-    class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
-        val textView: TextView = view as TextView
+
+    private val allItems: List<Item> = current_items + other_items
+    private val currentItemsCount: Int = current_items.size
+
+    class ViewHolder(val view: View): RecyclerView.ViewHolder(view) {
+        val textView: TextView = view.findViewById(R.id.tag_label)
+        val imageView: ImageView = view.findViewById(R.id.tag_status)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -29,9 +36,15 @@ class ItemAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
+        val item = allItems[position]
+
         holder.textView.text = item.label
-        holder.textView.setOnClickListener {
+
+        if (position < currentItemsCount) {
+            holder.imageView.setColorFilter(context.resources.getColor(R.color.status_in))
+        }
+
+        holder.view.setOnClickListener {
             AlertDialog.Builder(context).apply {
                 setTitle(item.label)
                 setMessage(with(item) {
@@ -64,5 +77,5 @@ class ItemAdapter(
         }
     }
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount(): Int = allItems.size
 }
