@@ -27,7 +27,9 @@ class BluetoothTransferDataHandler(val context: Context) : Handler(Looper.myLoop
             val database: AppDatabase = AppDatabase.getDatabase(context)
             val itemDao: ItemDao = database.itemDao()
 
-            if (itemDao.getItem(tagID) != null) {
+            var item: Item? = itemDao.getItem(tagID)
+            if (item != null) {
+                itemDao.changeItemState(item.id, !item.state)
                 return
             }
 
@@ -43,8 +45,8 @@ class BluetoothTransferDataHandler(val context: Context) : Handler(Looper.myLoop
                         setView(editText)
                         setPositiveButton(R.string.add_button) { dialog, _ ->
                             val label: String = editText.text.toString()
-                            val item = Item(tagID, label, true)
-                            itemDao.postItem(item)
+                            item = Item(tagID, label, true)
+                            itemDao.postItem(item!!)
                             dialog.dismiss()
                         }
                         setNegativeButton(R.string.cancel_button) { dialog, _ ->
