@@ -18,7 +18,6 @@ import com.example.smartbackpack.settings.BluetoothViewModel
 import com.example.smartbackpack.utilities.bluetooth.BluetoothConnectionHandler
 import com.example.smartbackpack.utilities.bluetooth.BluetoothConnectionThread
 import com.example.smartbackpack.utilities.bluetooth.BluetoothTransferDataHandler
-import com.example.smartbackpack.utilities.database.AppDatabase
 import kotlin.system.exitProcess
 
 
@@ -61,7 +60,6 @@ class MainActivity: AppCompatActivity() {
     private val hBluetoothConnection = BluetoothConnectionHandler(this)
     private val hBluetoothTransferData = BluetoothTransferDataHandler(this)
 
-    private lateinit var database: AppDatabase
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -120,7 +118,6 @@ class MainActivity: AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        database.close()
         tBluetoothConnection.cancel()
     }
 

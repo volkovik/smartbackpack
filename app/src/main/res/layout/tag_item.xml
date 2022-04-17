@@ -12,7 +12,6 @@
         android:layout_height="match_parent"
         android:clickable="true"
         android:focusable="true"
-        android:textColor="@color/black"
         tools:text="Hello" />
 
     <View
